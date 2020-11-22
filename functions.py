@@ -92,7 +92,7 @@ def divisors(num):
     arr = []
     arr2 = []
     d = 2
-    while len(arr2) != 3:
+    while len(arr2) != 1:
         if num % d == 0:
             num /= d
             arr2 += [d]

@@ -1,11 +1,8 @@
 import functions as fn
 
 # генерация ключей
-p = fn.randPrime(300)
+p = fn.randPrime(16)
 g = fn.primitiveRoot(p)
-print(p, '\n' , g)
-# p = 997
-# g = 7
 
 # p = 11
 # g = 2
