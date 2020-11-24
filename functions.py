@@ -76,7 +76,7 @@ def randPrime(n):
     rangeEnd = (10 ** n) - 1
     while True:
         num = random.randint(rangeStart, rangeEnd)
-        if isPrime(num) and str(num)[-1] != '6' and str(num)[-1] != '1':
+        if isPrime(num):
             return num
 
 # вычисление функции Эйлера
@@ -92,7 +92,7 @@ def divisors(num):
     arr = []
     arr2 = []
     d = 2
-    while len(arr2) != 1:
+    while d <= num:
         if num % d == 0:
             num /= d
             arr2 += [d]
@@ -124,16 +124,59 @@ def primitiveRoot(num):
 
 LOW_PRIMES = primeSieve(100)
 
-def gcd(a, b):
-    if a < b:
-        return gcd(b, a)
-    elif a % b == 0:
-        return b;
-    else:
-        return gcd(b, a % b)
+# генерация закрытого ключа, открытого ключа, чисел p и g
+def generateKeys(sizeA = 3, sizeP = 6):
+    a = rand(sizeA) # генерация закрытых ключей A и B
+    p = randPrime(sizeP) # простое число размерности
+    g = primitiveRoot(p) # первообразный корень
+    A = power(g, a, p) # открытый ключ
+    return a, A, p, g
 
-def genKey(p):
-    key = rand(len(str(p)) - 1)
-    while gcd(p, key) != 1:
-        key = rand(len(str(p)) - 1)
-    return key
+# генерация ключа второго пользователя
+def generateKeysBasedOnPrevious(p, g, sizeB = 3):
+    b = rand(sizeB)
+    B = power(g, b, p)
+    return b, B
+
+# генерация общего секретного ключа между двумя пользователями
+def generateSecretKey(a, B, p):
+    secretKey = power(B, a, p)
+    return secretKey
+
+# шифрование сообщения
+def encrypt(text, secretKey, p):
+    # перевод текста в числа
+    textArray = []
+    for i in text:
+        textArray.append(ord(i))
+    # шифрование текста
+    encrypted = []
+    for i in textArray:
+        encrypted.append(power(i * secretKey, 1, p))
+    # # перевод шифрованного текста в псевдотекст (нельзя расшифровывать по тексту)
+    # encryptedText = ''
+    # for i in encrypted:
+    #     encryptedText += chr(i % (sys.maxunicode + 1))
+
+    return encrypted#, encryptedText
+
+# расшифровка текста
+def decrypt(publicKey, encrypted, privateKey, p):
+    # расшифрование текста
+    decrypted = []
+    # MO = fn.power(s * fn.power(r, p - 1 - b, p), 1, p)
+    for i in encrypted:
+        decrypted.append(power(i * power(publicKey, p - 1 - privateKey, p), 1, p))
+    # # перевод расшифрованного текста в текст
+    # decryptedText = ''
+    # for i in range(len(decrypted)):
+    #     decryptedText += chr(decrypted[i] % (sys.maxunicode + 1))
+
+    return decrypted#, decryptedText
+
+# перевод текста в массив чисел
+def textToArray(text):
+    textArray = []
+    for i in text:
+        textArray.append(ord(i))
+    return textArray

@@ -1,33 +1,44 @@
 import functions as fn
 
-# генерация ключей
-p = fn.randPrime(16)
-g = fn.primitiveRoot(p)
 
-# p = 11
-# g = 2
+# генарация ключей двух пользователей по схеме Диффи-Хеллмана
+print('\n\n  GENERATING KEYS : \n')
 
-x = fn.genKey(p)
-y = fn.power(g, x, p)
+# пользователь A генерирует первым свой закрытый (a), открытый (A) ключ и числа p и g
+# отправляет пользователю B свой открытый ключ и числа p и g
+a, A, p, g = fn.generateKeys()
+print('User A keys and numbers:')
+print(' private key (a) : ', a)
+print(' public key  (A) : ', A)
+print(' numbers         : ', [p, g], '\n')
 
-# x = 8
-# y = 3
+# пользователь B генерирует свои закрытый (b), открытый (B) и секретный (secretKeyForB) ключи на основании пришедшей информации от пользователя A
+# отправляет пользователю A свой открытый ключ для того, чтобы он мог сгенерировать свой такой же секретный ключ (secretKeyForA)
+b, B = fn.generateKeysBasedOnPrevious(p, g)
+secretKeyForB = fn.generateSecretKey(b, A, p)
+print('User B all keys:')
+print(' private key (b) : ', b)
+print(' public key  (B) : ', B)
+print(' secret key      : ', secretKeyForB, '\n')
 
-print('Ключи:\n', x, '\n', y, '\n\n')
+# пользователь A генерирует свой секретный ключ, который совпадает с секретным ключом пользователя B
+secretKeyForA = fn.generateSecretKey(a, B, p)
+print(' A`s secret key  : ', secretKeyForA)
 
-# шифрование текста M
-M = ord('w')
-# M = 5
 
-print(M)
+# шифрование сообщения (text) пользователем A по схеме Эль-Гамаля
+print('\n\n  SENDING AND READING THE MESSAGE : \n')
 
-k = fn.genKey(p)
-# k = 9
-a = fn.power(g, k, p)
-b = fn.power(M * fn.power(y, k, p), 1, p)
+text = 'Hello, world!'
+textArray = fn.textToArray(text)
+print('Original message  : ', textArray, '\n')
 
-print('Шифротекст:\n', a, '\n', b, '\n\n')
+encrypted = fn.encrypt(text, secretKeyForA, p)
+print('Encrypted message : ', encrypted, '\n')
 
-MD = fn.power(b * fn.power(a, p - 1 - x, p), 1, p)
+# отправка пары (открытый ключ, зашифрованное сообщение) пользователю B
+sendData = (A, encrypted)
 
-print(MD)
+# расшифровка сообщения (encrypted) пользователем B
+decrypted = fn.decrypt(sendData[0], sendData[1], b, p)
+print('Decrypted message : ', decrypted)
